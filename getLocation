@@ -1,0 +1,33 @@
+private fun getLocation() {
+    if (ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    ) {
+        // Mendapatkan lokasi pengguna
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                // Lokasi ditemukan
+                if (location != null) {
+                    val userLocation = LatLng(location.latitude, location.longitude)
+                    // Menampilkan lokasi pengguna pada peta
+                    map?.addMarker(MarkerOptions().position(userLocation))
+                    map?.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15f))
+                    // Menyimpan lokasi pengguna pada server
+                    saveUserLocationToServer(userLocation)
+                    // Menghubungkan pengguna dengan mitra pengemudi yang cocok
+                    connectUserWithDriver(userLocation)
+                } else {
+                    // Lokasi tidak ditemukan
+                    Snackbar.make(
+                        findViewById(R.id.layout_main),
+                        "Tidak dapat mendapatkan lokasi pengguna.",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            }
+    } else {
+        // Meminta izin lokasi
+        requestLocationPermission()
+    }
+}
